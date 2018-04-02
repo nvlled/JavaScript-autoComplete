@@ -266,6 +266,12 @@ new autoComplete({
     <div id="fb-root"></div>
     <script src="auto-complete.js"></script>
     <script>
+        function createNode(html) {
+            var container = document.createElement("div");
+            container.innerHTML = html;
+            return container.children[0];
+        }
+
         var demo1 = new autoComplete({
             selector: '#hero-demo',
             minChars: 1,
@@ -293,9 +299,13 @@ new autoComplete({
             renderItem: function (item, search){
                 search = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&amp;');
                 var re = new RegExp("(" + search.split(' ').join('|') + ")", "gi");
-                return '<div class="autocomplete-suggestion" data-langname="'+item[0]+'" data-lang="'+item[1]+'" data-val="'+search+'"><img src="img/'+item[1]+'.png"> '+item[0].replace(re, "<b>$1</b>")+'</div>';
+                var html =  '<div class="autocomplete-suggestion" data-langname="'+item[0]+'" data-lang="'+item[1]+'" data-val="'+search+'"><img src="img/'+item[1]+'.png"> '+item[0].replace(re, "<b>$1</b>")+'</div>';
+                var node = createNode(html);
+                node.setAttribute("data-object", item);
+                return node;
             },
             onSelect: function(e, term, item){
+                console.log(">>>", item.getAttribute("data-object"));
                 console.log('Item "'+item.getAttribute('data-langname')+' ('+item.getAttribute('data-lang')+')" selected by '+(e.type == 'keydown' ? 'pressing enter' : 'mouse click')+'.');
                 document.getElementById('advanced-demo').value = item.getAttribute('data-langname')+' ('+item.getAttribute('data-lang')+')';
             }

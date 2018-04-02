@@ -27,6 +27,16 @@ var autoComplete = (function(){
                 if (found) cb.call(el, e);
             });
         }
+        function isNode(o){
+            if (typeof Node != "function")
+                return false;
+            return o instanceof Node;
+        }
+        function createNode(html) {
+            var container = document.createElement("div");
+            container.innerHTML = html;
+            return container.children[0];
+        }
 
         var o = {
             selector: 0,
@@ -118,9 +128,18 @@ var autoComplete = (function(){
                 var val = that.value;
                 that.cache[val] = data;
                 if (data.length && val.length >= o.minChars) {
-                    var s = '';
-                    for (var i=0;i<data.length;i++) s += o.renderItem(data[i], val);
-                    that.sc.innerHTML = s;
+                    var sc = that.sc;
+                    sc.innerHTML = "";
+                    for (var i=0;i<data.length;i++) {
+                        var item = o.renderItem(data[i], val)
+                        if (isNode(item)) {
+                            sc.appendChild(item);
+                        } else if (typeof item == "string") {
+                            sc.appendChild(createNode(item));
+                        } else {
+                            console.warn("invalid renderItem() value:", data[i]);
+                        }
+                    }
                     that.updateSC(0);
                 }
                 else
